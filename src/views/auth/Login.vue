@@ -39,12 +39,13 @@
                   class="block uppercase text-blueGray-600 text-xs font-bold mb-2"
                   htmlFor="grid-password"
                 >
-                  Email
+                  Email or Username
                 </label>
                 <input
-                  type="email"
+                  type="text"
+                  v-model="loginIdentifier"
                   class="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                  placeholder="Email"
+                  placeholder="Email or Username"
                 />
               </div>
 
@@ -57,6 +58,7 @@
                 </label>
                 <input
                   type="password"
+                  v-model="password"
                   class="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                   placeholder="Password"
                 />
@@ -74,10 +76,15 @@
                 </label>
               </div>
 
+              <div v-if="errorMessage" class="text-red-500 text-center mb-3 text-sm font-bold">
+                {{ errorMessage }}
+              </div>
+
               <div class="text-center mt-6">
                 <button
                   class="bg-blueGray-800 text-white active:bg-blueGray-600 text-sm font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-full ease-linear transition-all duration-150"
                   type="button"
+                  @click="login"
                 >
                   Sign In
                 </button>
@@ -104,13 +111,44 @@
 <script>
 import github from "@/assets/img/github.svg";
 import google from "@/assets/img/google.svg";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth, db } from "@/firebase";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { decryptData } from "@/utils/crypto";
 
 export default {
   data() {
     return {
       github,
       google,
+      loginIdentifier: "",
+      password: "",
+      errorMessage: "",
     };
+  },
+  methods: {
+    async login() {
+      try {
+        this.errorMessage = "";
+        let loginEmail = this.loginIdentifier;
+
+        // If it doesn't look like an email, assume it's a username
+        if (!loginEmail.includes('@')) {
+          const q = query(collection(db, "users"), where("username", "==", this.loginIdentifier));
+          const querySnapshot = await getDocs(q);
+          if (querySnapshot.empty) {
+            throw new Error("Username not found");
+          }
+          const userDoc = querySnapshot.docs[0].data();
+          loginEmail = decryptData(userDoc.emailEncrypted);
+        }
+
+        await signInWithEmailAndPassword(auth, loginEmail, this.password);
+        this.$router.push("/admin/dashboard");
+      } catch (error) {
+        this.errorMessage = error.message;
+      }
+    },
   },
 };
 </script>

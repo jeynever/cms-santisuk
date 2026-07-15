@@ -12,7 +12,7 @@
         >
           <img
             alt="..."
-            class="w-full rounded-full align-middle border-none shadow-lg"
+            class="w-full h-full object-cover rounded-full align-middle border-none shadow-lg"
             :src="image"
           />
         </span>
@@ -51,23 +51,63 @@
       >
         Seprated link
       </a>
+      <a
+        href="javascript:void(0);"
+        @click="logout"
+        class="text-sm py-2 px-4 font-bold block w-full whitespace-nowrap bg-transparent text-red-500 hover:bg-red-50 transition-colors"
+      >
+        <i class="fas fa-sign-out-alt mr-2"></i> ออกจากระบบ
+      </a>
     </div>
   </div>
 </template>
 
 <script>
 import { createPopper } from "@popperjs/core";
-
-import image from "@/assets/img/team-1-800x800.jpg";
+import { auth, db } from "@/firebase";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { decryptData } from "@/utils/crypto";
+import defaultImage from "@/assets/img/team-1-800x800.jpg";
 
 export default {
   data() {
     return {
       dropdownPopoverShow: false,
-      image: image,
+      image: defaultImage,
+      userId: null
     };
   },
+  mounted() {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        this.userId = user.uid;
+        this.fetchProfileImage();
+      }
+    });
+
+    window.addEventListener('profile-updated', this.fetchProfileImage);
+  },
+  beforeUnmount() {
+    window.removeEventListener('profile-updated', this.fetchProfileImage);
+  },
   methods: {
+    async fetchProfileImage() {
+      if (!this.userId) return;
+      try {
+        const docRef = doc(db, "users", this.userId);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          const decryptedImage = decryptData(data.profileImageEncrypted);
+          if (decryptedImage) {
+            this.image = decryptedImage;
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching user profile image", error);
+      }
+    },
     toggleDropdown: function (event) {
       event.preventDefault();
       if (this.dropdownPopoverShow) {
@@ -79,6 +119,14 @@ export default {
         });
       }
     },
+    async logout() {
+      try {
+        await signOut(auth);
+        this.$router.push('/auth/login');
+      } catch (error) {
+        console.error('Logout error', error);
+      }
+    }
   },
 };
 </script>

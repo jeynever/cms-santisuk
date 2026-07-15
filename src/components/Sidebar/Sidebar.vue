@@ -130,6 +130,30 @@
 
           <li class="items-center">
             <router-link
+              to="/admin/profile"
+              v-slot="{ href, navigate, isActive }"
+            >
+              <a
+                :href="href"
+                @click="navigate"
+                class="text-xs uppercase py-3 font-bold block"
+                :class="[
+                  isActive
+                    ? 'text-emerald-500 hover:text-emerald-600'
+                    : 'text-blueGray-700 hover:text-blueGray-500',
+                ]"
+              >
+                <i
+                  class="fas fa-user mr-2 text-sm"
+                  :class="[isActive ? 'opacity-75' : 'text-blueGray-300']"
+                ></i>
+                My Profile
+              </a>
+            </router-link>
+          </li>
+
+          <li class="items-center">
+            <router-link
               to="/admin/tables"
               v-slot="{ href, navigate, isActive }"
             >
@@ -148,6 +172,30 @@
                   :class="[isActive ? 'opacity-75' : 'text-blueGray-300']"
                 ></i>
                 Tables
+              </a>
+            </router-link>
+          </li>
+
+          <li class="items-center" v-if="userRole === 'admin' || userRole === 'super-admin'">
+            <router-link
+              to="/admin/all-users"
+              v-slot="{ href, navigate, isActive }"
+            >
+              <a
+                :href="href"
+                @click="navigate"
+                class="text-xs uppercase py-3 font-bold block"
+                :class="[
+                  isActive
+                    ? 'text-emerald-500 hover:text-emerald-600'
+                    : 'text-blueGray-700 hover:text-blueGray-500',
+                ]"
+              >
+                <i
+                  class="fas fa-users mr-2 text-sm"
+                  :class="[isActive ? 'opacity-75' : 'text-blueGray-300']"
+                ></i>
+                All Users
               </a>
             </router-link>
           </li>
@@ -174,39 +222,121 @@
           </li>
         </ul>
 
-        <!-- Divider -->
-        <hr class="my-4 md:min-w-full" />
-        <!-- Heading -->
-        <h6
-          class="md:min-w-full text-blueGray-500 text-xs uppercase font-bold block pt-1 pb-4 no-underline"
-        >
-          Auth Layout Pages
-        </h6>
-        <!-- Navigation -->
+        <template v-if="userRole === 'admin' || userRole === 'super-admin'">
+          <!-- Divider -->
+          <hr class="my-4 md:min-w-full" />
+          <!-- Heading -->
+          <h6
+            class="md:min-w-full text-blueGray-500 text-xs uppercase font-bold block pt-1 pb-4 no-underline"
+          >
+            Management Website
+          </h6>
+          <!-- Navigation -->
 
-        <ul class="md:flex-col md:min-w-full flex flex-col list-none md:mb-4">
-          <li class="items-center">
-            <router-link
-              class="text-blueGray-700 hover:text-blueGray-500 text-xs uppercase py-3 font-bold block"
-              to="/auth/login"
-            >
-              <i class="fas fa-fingerprint text-blueGray-300 mr-2 text-sm"></i>
-              Login
-            </router-link>
-          </li>
+          <ul class="md:flex-col md:min-w-full flex flex-col list-none md:mb-4">
+            <li class="items-center">
+              <router-link
+                class="text-blueGray-700 hover:text-blueGray-500 text-xs uppercase py-3 font-bold block"
+                to="/admin/information"
+              >
+                <i class="fas fa-info-circle text-blueGray-300 mr-2 text-sm"></i>
+                ข้อมูลทั่วไป
+              </router-link>
+            </li>
 
-          <li class="items-center">
-            <router-link
-              class="text-blueGray-700 hover:text-blueGray-500 text-xs uppercase py-3 font-bold block"
-              to="/auth/register"
-            >
-              <i
-                class="fas fa-clipboard-list text-blueGray-300 mr-2 text-sm"
-              ></i>
-              Register
-            </router-link>
-          </li>
-        </ul>
+            <li class="items-center">
+              <router-link
+                class="text-blueGray-700 hover:text-blueGray-500 text-xs uppercase py-3 font-bold block"
+                to="/admin/history"
+              >
+                <i class="fas fa-school text-blueGray-300 mr-2 text-sm"></i>
+                ประวัติโรงเรียน
+              </router-link>
+            </li>
+
+            <li class="items-center">
+              <router-link
+                class="text-blueGray-700 hover:text-blueGray-500 text-xs uppercase py-3 font-bold block"
+                to="/admin/contact"
+              >
+                <i class="fas fa-address-book text-blueGray-300 mr-2 text-sm"></i>
+                ข้อมูลติดต่อเรา
+              </router-link>
+            </li>
+
+            <li class="items-center">
+              <router-link
+                class="text-blueGray-700 hover:text-blueGray-500 text-xs uppercase py-3 font-bold block"
+                to="/admin/board"
+              >
+                <i class="fas fa-users-cog mr-2 text-sm text-blueGray-300"></i>
+                คณะกรรมการสถานศึกษา
+              </router-link>
+            </li>
+            
+            <li class="items-center">
+              <router-link
+                class="text-blueGray-700 hover:text-blueGray-500 text-xs uppercase py-3 font-bold block"
+                to="/admin/executives"
+              >
+                <i class="fas fa-user-tie mr-2 text-sm text-blueGray-300"></i>
+                ทำเนียบผู้บริหาร
+              </router-link>
+            </li>
+          </ul>
+
+          <!-- Divider -->
+          <hr class="my-4 md:min-w-full" />
+          <!-- Heading -->
+          <h6
+            class="md:min-w-full text-blueGray-500 text-xs uppercase font-bold block pt-1 pb-4 no-underline"
+          >
+            PR-Program
+          </h6>
+          <!-- Navigation -->
+
+          <ul class="md:flex-col md:min-w-full flex flex-col list-none md:mb-4">
+            <li class="items-center">
+              <router-link
+                class="text-blueGray-700 hover:text-blueGray-500 text-xs uppercase py-3 font-bold block"
+                to="/admin/pr/news"
+              >
+                <i class="fas fa-newspaper text-blueGray-300 mr-2 text-sm"></i>
+                ข่าวโรงเรียน
+              </router-link>
+            </li>
+
+            <li class="items-center">
+              <router-link
+                class="text-blueGray-700 hover:text-blueGray-500 text-xs uppercase py-3 font-bold block"
+                to="/admin/pr/journals"
+              >
+                <i class="fas fa-book-open text-blueGray-300 mr-2 text-sm"></i>
+                วารสารโรงเรียน
+              </router-link>
+            </li>
+
+            <li class="items-center">
+              <router-link
+                class="text-blueGray-700 hover:text-blueGray-500 text-xs uppercase py-3 font-bold block"
+                to="/admin/pr/announcements"
+              >
+                <i class="fas fa-bullhorn text-blueGray-300 mr-2 text-sm"></i>
+                ประกาศโรงเรียน
+              </router-link>
+            </li>
+
+            <li class="items-center">
+              <router-link
+                class="text-blueGray-700 hover:text-blueGray-500 text-xs uppercase py-3 font-bold block"
+                to="/admin/pr/achievements"
+              >
+                <i class="fas fa-award mr-2 text-sm text-blueGray-300"></i>
+                ผลงาน
+              </router-link>
+            </li>
+          </ul>
+        </template>
 
         <!-- Divider -->
         <hr class="my-4 md:min-w-full" />
@@ -349,12 +479,31 @@
 <script>
 import NotificationDropdown from "@/components/Dropdowns/NotificationDropdown.vue";
 import UserDropdown from "@/components/Dropdowns/UserDropdown.vue";
+import { auth, db } from "@/firebase";
+import { onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 
 export default {
   data() {
     return {
       collapseShow: "hidden",
+      userRole: null,
     };
+  },
+  mounted() {
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          const docRef = doc(db, "users", user.uid);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            this.userRole = docSnap.data().role;
+          }
+        } catch (error) {
+          console.error("Error fetching user role", error);
+        }
+      }
+    });
   },
   methods: {
     toggleCollapseShow: function (classes) {
