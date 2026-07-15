@@ -16,7 +16,12 @@ module.exports = async (req, res) => {
     const querySnapshot = await getDocs(collection(db, "board_members"));
     const data = [];
     querySnapshot.forEach((doc) => {
-      data.push({ id: doc.id, ...doc.data() });
+      let member = doc.data();
+      if (member.status === 'Inactive') {
+        member.name = 'ว่าง';
+        member.profileImageBase64 = '';
+      }
+      data.push({ id: doc.id, ...member });
     });
 
     res.status(200).json(data);
