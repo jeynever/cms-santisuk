@@ -284,7 +284,9 @@
               </router-link>
             </li>
           </ul>
+        </template>
 
+        <template v-if="['super-admin', 'admin', 'user', 'teacher', 'director'].includes(userRole)">
           <!-- Divider -->
           <hr class="my-4 md:min-w-full" />
           <!-- Heading -->
