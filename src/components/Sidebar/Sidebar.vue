@@ -247,6 +247,16 @@
             <li class="items-center">
               <router-link
                 class="text-blueGray-700 hover:text-blueGray-500 text-xs uppercase py-3 font-bold block"
+                to="/admin/banners"
+              >
+                <i class="fas fa-image text-blueGray-300 mr-2 text-sm"></i>
+                แบนเนอร์เว็บไซต์
+              </router-link>
+            </li>
+
+            <li class="items-center">
+              <router-link
+                class="text-blueGray-700 hover:text-blueGray-500 text-xs uppercase py-3 font-bold block"
                 to="/admin/history"
               >
                 <i class="fas fa-school text-blueGray-300 mr-2 text-sm"></i>

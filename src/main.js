@@ -40,6 +40,9 @@ import AnnouncementForm from "@/views/admin/pr/AnnouncementForm.vue";
 import Achievements from "@/views/admin/pr/Achievements.vue";
 import AchievementForm from "@/views/admin/pr/AchievementForm.vue";
 
+import Banners from "@/views/admin/Banners.vue";
+import BannerForm from "@/views/admin/BannerForm.vue";
+
 // views for Auth layout
 
 import Login from "@/views/auth/Login.vue";
@@ -90,6 +93,18 @@ const routes = [
       {
         path: "/admin/information",
         component: Information,
+      },
+      {
+        path: "/admin/banners",
+        component: Banners,
+      },
+      {
+        path: "/admin/banners/add",
+        component: BannerForm,
+      },
+      {
+        path: "/admin/banners/edit/:id",
+        component: BannerForm,
       },
       {
         path: "/admin/history",
