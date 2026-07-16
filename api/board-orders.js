@@ -1,4 +1,4 @@
-const { collection, getDocs, query, orderBy } = require("firebase/firestore");
+const { collection, getDocs } = require("firebase/firestore");
 const { db } = require("./_firebase.js");
 
 module.exports = async (req, res) => {
@@ -13,16 +13,22 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const q = query(collection(db, "board_orders"), orderBy("createdAt", "desc"));
-    const querySnapshot = await getDocs(q);
+    const querySnapshot = await getDocs(collection(db, "board_orders"));
     const data = [];
     querySnapshot.forEach((doc) => {
-      // ดึงข้อมูลแต่ทำการแปลง createdAt ให้อ่านง่ายขึ้น
       let order = doc.data();
-      if (order.createdAt && order.createdAt.toDate) {
-        order.createdAt = order.createdAt.toDate().toISOString();
+      // If there's no orderName, fallback to title. Same for orderDate -> createdAt
+      if (!order.orderName) order.orderName = order.title || "";
+      if (!order.orderDate && order.createdAt && order.createdAt.toDate) {
+        order.orderDate = order.createdAt.toDate().toISOString().split('T')[0];
       }
       data.push({ id: doc.id, ...order });
+    });
+
+    data.sort((a, b) => {
+      const dateA = a.orderDate || (a.createdAt && a.createdAt.toDate ? a.createdAt.toDate().toISOString() : "");
+      const dateB = b.orderDate || (b.createdAt && b.createdAt.toDate ? b.createdAt.toDate().toISOString() : "");
+      return dateB.localeCompare(dateA);
     });
 
     res.status(200).json(data);
