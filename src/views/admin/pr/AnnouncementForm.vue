@@ -72,7 +72,7 @@
     </div>
     
     <!-- Crop Modal -->
-    <div v-if="showCropModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
+    <div v-if="showCropModal" class="fixed inset-0 z-50 flex items-start justify-center bg-black bg-opacity-75 pt-10">
       <div class="relative bg-white w-full max-w-4xl mx-4 rounded-lg shadow-lg flex flex-col max-h-screen">
         <div class="flex items-start justify-between p-5 border-b border-solid border-blueGray-200 rounded-t">
           <h3 class="text-xl font-semibold">ครอบตัดรูปภาพประกาศ (A4 แนวตั้ง)</h3>

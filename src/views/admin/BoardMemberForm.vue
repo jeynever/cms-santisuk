@@ -83,7 +83,7 @@
     </div>
 
     <!-- Crop Modal -->
-    <div v-if="showCropModal" style="position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; z-index: 999999 !important; background-color: rgba(0,0,0,0.85) !important; display: flex !important; justify-content: center !important; align-items: center !important; width: 100vw !important; height: 100vh !important;">
+    <div v-if="showCropModal" style="position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; z-index: 999999 !important; background-color: rgba(0,0,0,0.85) !important; display: flex !important; justify-content: center !important; align-items: flex-start !important; padding-top: 2.5rem !important; width: 100vw !important; height: 100vh !important;">
       <div style="position: relative !important; background-color: white !important; width: 100% !important; max-width: 42rem !important; margin: 0 1rem !important; border-radius: 0.5rem !important; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1) !important; display: flex !important; flex-direction: column !important; max-height: 100vh !important; z-index: 1000000 !important;">
         <div class="flex items-start justify-between p-5 border-b border-solid border-blueGray-200 rounded-t">
           <h3 class="text-xl font-semibold">ปรับแต่งรูปโปรไฟล์</h3>
