@@ -12,21 +12,24 @@
     
     <div class="p-4 bg-blueGray-50 border-t border-b border-blueGray-200">
       <form @submit.prevent="submitForm">
+        <!-- Row 1: Name and Date -->
         <div class="flex flex-wrap -mx-3">
-          <!-- Order Name -->
-          <div class="w-full md:w-4/12 px-3 mb-4 md:mb-0">
+          <!-- Order Name (75%) -->
+          <div class="w-full md:w-9/12 px-3 mb-4">
             <label class="block uppercase text-blueGray-600 text-xs font-bold mb-2">ชื่อคำสั่ง</label>
             <input type="text" v-model="form.orderName" required placeholder="เช่น แต่งตั้งคณะกรรมการฯ ปี 2567" class="border-0 px-3 py-2 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150" />
           </div>
           
-          <!-- Order Date -->
-          <div class="w-full md:w-3/12 px-3 mb-4 md:mb-0">
+          <!-- Order Date (25%) -->
+          <div class="w-full md:w-3/12 px-3 mb-4">
             <label class="block uppercase text-blueGray-600 text-xs font-bold mb-2">วันที่คำสั่ง</label>
             <input type="date" v-model="form.orderDate" required class="border-0 px-3 py-2 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150" />
           </div>
+        </div>
 
-          <!-- File Upload -->
-          <div class="w-full md:w-5/12 px-3 mb-4 md:mb-0">
+        <!-- Row 2: File Upload -->
+        <div class="flex flex-wrap -mx-3">
+          <div class="w-full px-3">
             <label class="block uppercase text-blueGray-600 text-xs font-bold mb-2">อัปโหลดไฟล์ (PDF, JPG, PNG)</label>
             <input type="file" ref="fileInput" @change="onFileChange" accept=".pdf,image/*" :required="!isEditMode" class="border-0 px-3 py-2 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150" />
             <p v-if="isEditMode" class="text-xs text-lightBlue-500 mt-1">*เลือกไฟล์ใหม่หากต้องการเปลี่ยนเอกสาร</p>
