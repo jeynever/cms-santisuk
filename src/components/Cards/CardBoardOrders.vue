@@ -11,28 +11,39 @@
     </div>
     
     <div class="p-4 bg-blueGray-50 border-t border-b border-blueGray-200">
-      <form @submit.prevent="submitForm" class="flex flex-col md:flex-row items-end gap-4">
-        <div class="w-full md:w-3/12">
-          <label class="block uppercase text-blueGray-600 text-xs font-bold mb-2">ชื่อคำสั่ง</label>
-          <input type="text" v-model="form.orderName" required placeholder="เช่น แต่งตั้งคณะกรรมการฯ ปี 2567" class="border-0 px-3 py-2 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150" />
+      <form @submit.prevent="submitForm">
+        <div class="flex flex-wrap -mx-3">
+          <!-- Order Name -->
+          <div class="w-full md:w-4/12 px-3 mb-4 md:mb-0">
+            <label class="block uppercase text-blueGray-600 text-xs font-bold mb-2">ชื่อคำสั่ง</label>
+            <input type="text" v-model="form.orderName" required placeholder="เช่น แต่งตั้งคณะกรรมการฯ ปี 2567" class="border-0 px-3 py-2 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150" />
+          </div>
+          
+          <!-- Order Date -->
+          <div class="w-full md:w-3/12 px-3 mb-4 md:mb-0">
+            <label class="block uppercase text-blueGray-600 text-xs font-bold mb-2">วันที่คำสั่ง</label>
+            <input type="date" v-model="form.orderDate" required class="border-0 px-3 py-2 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150" />
+          </div>
+
+          <!-- File Upload -->
+          <div class="w-full md:w-5/12 px-3 mb-4 md:mb-0">
+            <label class="block uppercase text-blueGray-600 text-xs font-bold mb-2">อัปโหลดไฟล์ (PDF, JPG, PNG)</label>
+            <input type="file" ref="fileInput" @change="onFileChange" accept=".pdf,image/*" :required="!isEditMode" class="border-0 px-3 py-2 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150" />
+            <p v-if="isEditMode" class="text-xs text-lightBlue-500 mt-1">*เลือกไฟล์ใหม่หากต้องการเปลี่ยนเอกสาร</p>
+          </div>
         </div>
-        <div class="w-full md:w-2/12">
-          <label class="block uppercase text-blueGray-600 text-xs font-bold mb-2">วันที่คำสั่ง</label>
-          <input type="date" v-model="form.orderDate" required class="border-0 px-3 py-2 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150" />
-        </div>
-        <div class="w-full md:w-5/12">
-          <label class="block uppercase text-blueGray-600 text-xs font-bold mb-2">อัปโหลดไฟล์ (PDF, JPG, PNG)</label>
-          <input type="file" ref="fileInput" @change="onFileChange" accept=".pdf,image/*" :required="!isEditMode" class="border-0 px-3 py-2 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150" />
-          <p v-if="isEditMode" class="text-xs text-lightBlue-500 mt-1">*เลือกไฟล์ใหม่หากต้องการเปลี่ยนเอกสาร</p>
-        </div>
-        <div class="w-full md:w-2/12 text-right">
-          <button type="submit" :disabled="isUploading" class="text-white active:bg-emerald-600 font-bold uppercase text-xs px-4 py-3 rounded shadow hover:shadow-md outline-none focus:outline-none w-full ease-linear transition-all duration-150 disabled:opacity-50" :class="isEditMode ? 'bg-lightBlue-500' : 'bg-emerald-500'">
-            <i class="fas fa-spinner fa-spin mr-1" v-if="isUploading"></i>
-            {{ isUploading ? 'กำลังบันทึก...' : (isEditMode ? 'บันทึกการแก้ไข' : 'เพิ่มเอกสาร') }}
-          </button>
-          <button v-if="isEditMode" type="button" @click="cancelEdit" class="mt-2 text-blueGray-500 bg-transparent border border-solid border-blueGray-500 hover:bg-blueGray-500 hover:text-white active:bg-blueGray-600 font-bold uppercase text-xs px-4 py-2 rounded outline-none focus:outline-none w-full ease-linear transition-all duration-150">
-            ยกเลิก
-          </button>
+        
+        <!-- Action Buttons -->
+        <div class="flex flex-wrap mt-4">
+          <div class="w-full flex justify-end gap-2">
+            <button v-if="isEditMode" type="button" @click="cancelEdit" class="text-blueGray-500 bg-transparent border border-solid border-blueGray-500 hover:bg-blueGray-500 hover:text-white active:bg-blueGray-600 font-bold uppercase text-xs px-4 py-2 rounded outline-none focus:outline-none ease-linear transition-all duration-150">
+              ยกเลิก
+            </button>
+            <button type="submit" :disabled="isUploading" class="text-white active:bg-emerald-600 font-bold uppercase text-xs px-4 py-2 rounded shadow hover:shadow-md outline-none focus:outline-none ease-linear transition-all duration-150 disabled:opacity-50" :class="isEditMode ? 'bg-lightBlue-500 hover:bg-lightBlue-600' : 'bg-emerald-500 hover:bg-emerald-600'">
+              <i class="fas fa-spinner fa-spin mr-1" v-if="isUploading"></i>
+              {{ isUploading ? 'กำลังบันทึก...' : (isEditMode ? 'บันทึกการแก้ไข' : 'เพิ่มเอกสาร') }}
+            </button>
+          </div>
         </div>
       </form>
     </div>
