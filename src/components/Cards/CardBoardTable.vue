@@ -29,11 +29,22 @@
           </tr>
         </thead>
         <tbody v-if="!isLoading">
-          <tr v-for="member in members" :key="member.id">
+          <tr 
+            v-for="(member, index) in members" 
+            :key="member.id"
+            draggable="true"
+            @dragstart="onDragStart($event, index)"
+            @dragover.prevent
+            @dragenter.prevent
+            @drop="onDrop($event, index)"
+            class="hover:bg-blueGray-50 cursor-move transition-colors duration-200"
+            :class="{'opacity-50': dragIndex === index}"
+          >
             <th class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left flex items-center">
+              <i class="fas fa-grip-vertical text-blueGray-300 mr-4 cursor-grab"></i>
               <img 
                 :src="member.status === 'Inactive' ? blankAvatar : (member.profileImageBase64 || defaultImage)" 
-                class="h-12 w-12 bg-white rounded-full border object-cover" 
+                class="h-12 w-12 bg-white rounded-full border object-cover pointer-events-none" 
                 alt="..." 
               />
               <span class="ml-3 font-bold text-blueGray-600">
@@ -80,13 +91,15 @@
 
 <script>
 import { db } from "@/firebase";
-import { collection, getDocs, doc, deleteDoc } from "firebase/firestore";
+import { collection, getDocs, doc, deleteDoc, updateDoc } from "firebase/firestore";
 
 export default {
   data() {
     return {
       members: [],
       isLoading: true,
+      isSavingOrder: false,
+      dragIndex: null,
       defaultImage: require("@/assets/img/team-1-800x800.jpg"),
       blankAvatar: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTIiIGZpbGw9IiNiY2JjYmMiLz48cGF0aCBkPSJNMTIgMTNjLTIuNjcgMC04IDEuMzQtOCA0djNoMTZ2LTNjMC0yLjY2LTUuMzMtNC04LTR6IiBmaWxsPSIjZjJmMmYyIi8+PGNpcmNsZSBjeD0iMTIiIGN5PSI4IiByPSI0IiBmaWxsPSIjZjJmMmYyIi8+PC9zdmc+",
     };
@@ -103,12 +116,61 @@ export default {
         querySnapshot.forEach((doc) => {
           membersList.push({ id: doc.id, ...doc.data() });
         });
-        // Sort if needed, currently no sort field so just display as fetched
+        
+        // เรียงลำดับตามฟิลด์ order (ถ้ามี) ถ้าไม่มีให้ใช้อันดับเดิม
+        membersList.sort((a, b) => (a.order || 0) - (b.order || 0));
         this.members = membersList;
       } catch (error) {
         console.error("Error fetching members:", error);
       } finally {
         this.isLoading = false;
+      }
+    },
+    onDragStart(event, index) {
+      this.dragIndex = index;
+      event.dataTransfer.effectAllowed = "move";
+      // This is required for Firefox
+      event.dataTransfer.setData("text/plain", index);
+    },
+    async onDrop(event, dropIndex) {
+      if (this.dragIndex === null || this.dragIndex === dropIndex) {
+        this.dragIndex = null;
+        return;
+      }
+
+      const draggedItem = this.members[this.dragIndex];
+      // เอาตัวที่ถูกลากออก
+      this.members.splice(this.dragIndex, 1);
+      // แทรกตัวที่ถูกลากไปไว้ที่ตำแหน่ง dropIndex
+      this.members.splice(dropIndex, 0, draggedItem);
+      
+      this.dragIndex = null;
+      await this.saveOrder();
+    },
+    async saveOrder() {
+      this.isSavingOrder = true;
+      try {
+        const promises = this.members.map((member, index) => {
+          member.order = index; // Update local state order
+          return updateDoc(doc(db, "board_members", member.id), { order: index });
+        });
+        await Promise.all(promises);
+        
+        // Show success toast (optional)
+        const toast = document.createElement('div');
+        toast.className = 'fixed bottom-4 right-4 bg-emerald-500 text-white px-6 py-3 rounded shadow-lg z-50 font-bold transition-opacity duration-300';
+        toast.innerText = 'บันทึกลำดับเรียบร้อยแล้ว';
+        document.body.appendChild(toast);
+        setTimeout(() => {
+          toast.style.opacity = '0';
+          setTimeout(() => document.body.removeChild(toast), 300);
+        }, 3000);
+        
+      } catch (error) {
+        console.error("Error saving new order:", error);
+        alert("เกิดข้อผิดพลาดในการบันทึกลำดับ");
+      } finally {
+        this.isSavingOrder = false;
       }
     },
     async deleteMember(id) {

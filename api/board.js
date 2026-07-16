@@ -24,6 +24,8 @@ module.exports = async (req, res) => {
       data.push({ id: doc.id, ...member });
     });
 
+    data.sort((a, b) => (a.order || 0) - (b.order || 0));
+
     res.status(200).json(data);
   } catch (error) {
     console.error(error);
