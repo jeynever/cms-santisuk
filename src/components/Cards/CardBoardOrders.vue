@@ -11,7 +11,7 @@
     </div>
     
     <div class="p-4 bg-blueGray-50 border-t border-b border-blueGray-200">
-      <form @submit.prevent="submitForm">
+      <form @submit.prevent="submitForm" ref="orderForm">
         <!-- Row 1: Name and Date -->
         <div class="flex flex-wrap -mx-3">
           <!-- Order Name (75%) -->
@@ -247,7 +247,13 @@ export default {
       if (this.$refs.fileInput) {
         this.$refs.fileInput.value = "";
       }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      
+      // เลื่อนหน้าจอมาที่ฟอร์มแก้ไขแทนการเลื่อนไปบนสุดของจอ
+      this.$nextTick(() => {
+        if (this.$refs.orderForm) {
+          this.$refs.orderForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      });
     },
     cancelEdit() {
       this.isEditMode = false;
