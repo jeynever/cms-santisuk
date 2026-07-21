@@ -36,7 +36,7 @@
               <div class="w-full lg:w-12/12 px-4">
                 <div class="relative w-full mb-3">
                   <label class="block uppercase text-blueGray-600 text-xs font-bold mb-2">
-                    รูปภาพแบนเนอร์ (1920x650 px, ไม่เกิน 2MB)
+                    รูปภาพแบนเนอร์ (1920x650 px, ไม่เกิน 5MB)
                   </label>
                   <input
                     type="file"
@@ -157,9 +157,9 @@ export default {
       if (files.length > 0) {
         const file = files[0];
 
-        // Check file size limit: 2MB (2 * 1024 * 1024 bytes)
-        if (file.size > 2 * 1024 * 1024) {
-          alert("ขนาดไฟล์ต้องไม่เกิน 2MB");
+        // Check file size limit: 5MB (5 * 1024 * 1024 bytes)
+        if (file.size > 5 * 1024 * 1024) {
+          alert("ขนาดไฟล์ต้องไม่เกิน 5MB");
           this.$refs.fileInput.value = "";
           return;
         }
