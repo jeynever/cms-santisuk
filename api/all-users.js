@@ -1,0 +1,29 @@
+const { collection, getDocs } = require("firebase/firestore");
+const { db } = require("./_firebase.js");
+
+module.exports = async (req, res) => {
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+
+  try {
+    const querySnapshot = await getDocs(collection(db, "users"));
+    const data = [];
+    
+    querySnapshot.forEach((doc) => {
+      // Exclude sensitive fields if necessary, but returning everything by default
+      data.push({ id: doc.id, ...doc.data() });
+    });
+
+    res.status(200).json(data);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ error: "Internal Server Error", details: error.message });
+  }
+};
