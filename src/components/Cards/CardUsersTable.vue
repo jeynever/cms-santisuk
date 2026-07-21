@@ -137,7 +137,7 @@
 
 <script>
 import { db } from "@/firebase";
-import { collection, getDocs, doc, deleteDoc, query, orderBy, writeBatch } from "firebase/firestore";
+import { collection, getDocs, doc, deleteDoc, writeBatch } from "firebase/firestore";
 import { decryptData } from "@/utils/crypto";
 import team2 from "@/assets/img/team-2-800x800.jpg";
 
