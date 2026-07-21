@@ -170,8 +170,7 @@ export default {
     async fetchUsers() {
       this.isLoading = true;
       try {
-        const q = query(collection(db, "users"), orderBy("order", "asc"));
-        const querySnapshot = await getDocs(q);
+        const querySnapshot = await getDocs(collection(db, "users"));
         const fetchedUsers = [];
         querySnapshot.forEach((doc) => {
           const data = doc.data();
