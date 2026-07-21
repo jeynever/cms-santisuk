@@ -42,9 +42,12 @@ module.exports = async (req, res) => {
         role: docData.role || "unknown",
         position: docData.position || "",
         affiliation: docData.affiliation || "",
-        profileImage: decryptData(docData.profileImageEncrypted) || ""
+        profileImage: decryptData(docData.profileImageEncrypted) || "",
+        order: docData.order || 9999
       });
     });
+
+    data.sort((a, b) => a.order - b.order);
 
     res.status(200).json(data);
   } catch (error) {

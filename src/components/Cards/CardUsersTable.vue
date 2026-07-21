@@ -5,6 +5,9 @@
         <div class="relative w-full px-4 max-w-full flex-grow flex-1">
           <h3 class="font-semibold text-lg text-blueGray-700">
             รายชื่อผู้ใช้งานระบบ
+            <span v-if="isUpdatingOrder" class="ml-2 text-sm text-emerald-500 font-normal">
+              <i class="fas fa-spinner fa-spin mr-1"></i> กำลังบันทึกลำดับ...
+            </span>
           </h3>
         </div>
         <div class="relative w-full px-4 max-w-full flex-grow flex-1 text-right">
@@ -22,6 +25,7 @@
       <table class="items-center w-full bg-transparent border-collapse">
         <thead>
           <tr>
+            <th class="px-6 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left bg-blueGray-50 text-blueGray-500 border-blueGray-100 w-10"></th>
             <th class="px-6 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left bg-blueGray-50 text-blueGray-500 border-blueGray-100">ผู้ใช้งาน</th>
             <th class="px-6 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left bg-blueGray-50 text-blueGray-500 border-blueGray-100">อีเมล</th>
             <th class="px-6 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left bg-blueGray-50 text-blueGray-500 border-blueGray-100">ระดับสิทธิ์ / ตำแหน่ง</th>
@@ -30,7 +34,17 @@
           </tr>
         </thead>
         <tbody v-if="!isLoading">
-          <tr v-for="user in users" :key="user.id">
+          <tr v-for="(user, index) in users" :key="user.id"
+              :draggable="canManage(user)"
+              @dragstart="onDragStart($event, index)"
+              @dragover.prevent
+              @drop="onDrop($event, index)"
+              @dragenter.prevent
+              class="transition-all duration-200"
+              :class="{ 'opacity-50 bg-blueGray-100': dragIndex === index, 'cursor-move': canManage(user) }">
+            <td class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
+              <i class="fas fa-grip-lines text-blueGray-400" v-if="canManage(user)"></i>
+            </td>
             <th class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left flex items-center">
               <img :src="user.profileImage || defaultImage" class="h-12 w-12 bg-white rounded-full border object-cover" alt="..." />
               <span class="ml-3 font-bold text-blueGray-600">
@@ -76,12 +90,12 @@
             </td>
           </tr>
           <tr v-if="users.length === 0">
-            <td colspan="5" class="text-center py-4 text-blueGray-500">ไม่พบข้อมูลผู้ใช้งาน</td>
+            <td colspan="6" class="text-center py-4 text-blueGray-500">ไม่พบข้อมูลผู้ใช้งาน</td>
           </tr>
         </tbody>
         <tbody v-else>
           <tr>
-            <td colspan="5" class="text-center py-10">
+            <td colspan="6" class="text-center py-10">
               <i class="fas fa-spinner fa-spin text-3xl text-emerald-500"></i>
             </td>
           </tr>
@@ -123,7 +137,7 @@
 
 <script>
 import { db } from "@/firebase";
-import { collection, getDocs, doc, deleteDoc } from "firebase/firestore";
+import { collection, getDocs, doc, deleteDoc, query, orderBy, writeBatch } from "firebase/firestore";
 import { decryptData } from "@/utils/crypto";
 import team2 from "@/assets/img/team-2-800x800.jpg";
 
@@ -145,6 +159,8 @@ export default {
       defaultImage: team2,
       showDeleteModal: false,
       selectedUser: null,
+      dragIndex: null,
+      isUpdatingOrder: false,
     };
   },
   mounted() {
@@ -154,7 +170,8 @@ export default {
     async fetchUsers() {
       this.isLoading = true;
       try {
-        const querySnapshot = await getDocs(collection(db, "users"));
+        const q = query(collection(db, "users"), orderBy("order", "asc"));
+        const querySnapshot = await getDocs(q);
         const fetchedUsers = [];
         querySnapshot.forEach((doc) => {
           const data = doc.data();
@@ -168,9 +185,14 @@ export default {
             role: data.role || "unknown",
             position: data.position || "",
             affiliation: data.affiliation || "",
-            profileImage: decryptData(data.profileImageEncrypted) || ""
+            profileImage: decryptData(data.profileImageEncrypted) || "",
+            order: data.order || 9999
           });
         });
+        
+        // If sorting failed because of missing fields or mixed types, enforce frontend sort
+        fetchedUsers.sort((a, b) => a.order - b.order);
+        
         this.users = fetchedUsers;
       } catch (error) {
         console.error("Error fetching users:", error);
@@ -211,6 +233,37 @@ export default {
       } catch (error) {
         console.error("Error deleting user:", error);
         alert("เกิดข้อผิดพลาดในการลบข้อมูล");
+      }
+    },
+    onDragStart(event, index) {
+      this.dragIndex = index;
+      event.dataTransfer.effectAllowed = 'move';
+    },
+    async onDrop(event, index) {
+      if (this.dragIndex === null || this.dragIndex === index) return;
+      
+      const movedItem = this.users[this.dragIndex];
+      this.users.splice(this.dragIndex, 1);
+      this.users.splice(index, 0, movedItem);
+      
+      this.dragIndex = null;
+      await this.saveOrder();
+    },
+    async saveOrder() {
+      this.isUpdatingOrder = true;
+      try {
+        const batch = writeBatch(db);
+        this.users.forEach((user, idx) => {
+          user.order = idx + 1;
+          const userRef = doc(db, "users", user.id);
+          batch.update(userRef, { order: user.order });
+        });
+        await batch.commit();
+      } catch (error) {
+        console.error("Error updating order:", error);
+        alert("เกิดข้อผิดพลาดในการบันทึกลำดับ อาจเนื่องจากยังไม่ได้สร้าง Index กรุณาตรวจสอบใน Console");
+      } finally {
+        this.isUpdatingOrder = false;
       }
     }
   }
