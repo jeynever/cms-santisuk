@@ -1,5 +1,19 @@
 const { collection, getDocs } = require("firebase/firestore");
 const { db } = require("./_firebase.js");
+const CryptoJS = require("crypto-js");
+
+const SECRET_KEY = process.env.VUE_APP_ENCRYPTION_SECRET || 'default_secret_key_change_in_production';
+
+const decryptData = (ciphertext) => {
+  if (!ciphertext) return ciphertext;
+  try {
+    const bytes = CryptoJS.AES.decrypt(ciphertext, SECRET_KEY);
+    return bytes.toString(CryptoJS.enc.Utf8);
+  } catch (e) {
+    console.error("Error decrypting data", e);
+    return null;
+  }
+};
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true);
@@ -17,8 +31,19 @@ module.exports = async (req, res) => {
     const data = [];
     
     querySnapshot.forEach((doc) => {
-      // Exclude sensitive fields if necessary, but returning everything by default
-      data.push({ id: doc.id, ...doc.data() });
+      const docData = doc.data();
+      data.push({
+        id: doc.id,
+        username: docData.username || "",
+        prefix: docData.prefix || "",
+        firstName: decryptData(docData.firstNameEncrypted) || "",
+        lastName: decryptData(docData.lastNameEncrypted) || "",
+        email: decryptData(docData.emailEncrypted) || "",
+        role: docData.role || "unknown",
+        position: docData.position || "",
+        affiliation: docData.affiliation || "",
+        profileImage: decryptData(docData.profileImageEncrypted) || ""
+      });
     });
 
     res.status(200).json(data);
