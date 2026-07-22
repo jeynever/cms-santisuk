@@ -41,6 +41,7 @@ module.exports = async (req, res) => {
         email: decryptData(docData.emailEncrypted) || "",
         role: docData.role || "unknown",
         position: docData.position || "",
+        academicStanding: docData.academicStanding || "",
         affiliation: docData.affiliation || "",
         profileImage: decryptData(docData.profileImageEncrypted) || "",
         order: docData.order || 9999
