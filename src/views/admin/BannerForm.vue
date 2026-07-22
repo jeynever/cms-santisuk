@@ -36,7 +36,7 @@
               <div class="w-full lg:w-12/12 px-4">
                 <div class="relative w-full mb-3">
                   <label class="block uppercase text-blueGray-600 text-xs font-bold mb-2">
-                    รูปภาพแบนเนอร์ (1920x650 px, ไม่เกิน 5MB)
+                    รูปภาพแบนเนอร์ (1280x720 px, ไม่เกิน 5MB)
                   </label>
                   <input
                     type="file"
@@ -170,8 +170,8 @@ export default {
         reader.onload = (event) => {
           img.src = event.target.result;
           img.onload = async () => {
-            if (img.width !== 1920 || img.height !== 650) {
-              alert(`รูปภาพของคุณมีขนาด ${img.width}x${img.height} px ซึ่งไม่ตรงกับที่กำหนด (1920x650 px)\nกรุณาทำรูปภาพมาใหม่ให้ได้ขนาดพอดีเป๊ะครับ`);
+            if (img.width !== 1280 || img.height !== 720) {
+              alert(`รูปภาพของคุณมีขนาด ${img.width}x${img.height} px ซึ่งไม่ตรงกับที่กำหนด (1280x720 px)\nกรุณาทำรูปภาพมาใหม่ให้ได้ขนาดพอดีเป๊ะครับ`);
               this.$refs.fileInput.value = "";
             } else {
               // Upload to Cloudinary
